@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:text_copypaster/providers/equipments.dart';
 import 'package:text_copypaster/screens/home.dart';
 import 'package:window_size/window_size.dart';
 
@@ -7,21 +9,25 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // DatabaseHelper data = DatabaseHelper();
-  // data.clearDatabase();
+  // await data.resetDatabase();
+  // await data.clearDatabase();
 
   if (Platform.isWindows) {
     setWindowTitle('OS text-copypaster');
     setWindowMaxSize(const Size(2000, 2000));
     setWindowMinSize(const Size(1000, 1000));
   }
-  runApp(const MyApp());
+
+  runApp(ChangeNotifierProvider(
+    create: (context) => EquipmentsRepository(),
+    child: const MyApp(),
+  ));
 }
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _MyAppState createState() => _MyAppState();
 }
 

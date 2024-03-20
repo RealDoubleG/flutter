@@ -4,12 +4,14 @@ import 'package:text_copypaster/themes/colors.dart';
 class ServiceCardHeader extends StatelessWidget {
   final bool expanded;
   final VoidCallback onTap;
+  final String name;
 
-  const ServiceCardHeader({
-    Key? key,
-    required this.expanded,
-    required this.onTap,
-  }) : super(key: key);
+  const ServiceCardHeader(
+      {Key? key,
+      required this.expanded,
+      required this.onTap,
+      required this.name})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +38,7 @@ class ServiceCardHeader extends StatelessWidget {
               ),
               const SizedBox(width: 8), // Add some space between icon and text
               Text(
-                'Nome do serviço',
+                name,
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                   color: Theme.of(context).brightness == Brightness.light

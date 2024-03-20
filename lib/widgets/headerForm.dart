@@ -4,8 +4,11 @@ import 'package:text_copypaster/widgets/textInput.dart';
 
 class HeaderForm extends StatelessWidget {
   final VoidCallback onPressed;
+  final Function(String) onTextChanged;
 
-  const HeaderForm({Key? key, required this.onPressed}) : super(key: key);
+  const HeaderForm(
+      {Key? key, required this.onPressed, required this.onTextChanged})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +29,9 @@ class HeaderForm extends StatelessWidget {
             prefixIcon: Icons.search,
             backgroundColor: AppColors.terciaryColor(context),
             width: 300,
+            onTextChanged: (text) {
+              onTextChanged(text);
+            },
           ),
           const SizedBox(width: 20),
           ElevatedButton(

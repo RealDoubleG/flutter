@@ -1,15 +1,21 @@
 class Service {
-  int id;
+  int? id;
   String name;
   String description;
+  int equipmentId;
 
-  Service({required this.id, required this.name, required this.description});
+  Service(
+      {this.id,
+      required this.name,
+      required this.description,
+      required this.equipmentId});
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
       'name': name,
       'description': description,
+      'equipment_id': equipmentId
     };
   }
 
@@ -18,6 +24,7 @@ class Service {
       id: map['id'],
       name: map['name'],
       description: map['description'],
+      equipmentId: map['equipment_id'],
     );
   }
 }

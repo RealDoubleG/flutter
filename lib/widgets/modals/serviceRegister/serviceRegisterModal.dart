@@ -1,13 +1,55 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:text_copypaster/database/databaseHelper.dart';
 import 'package:text_copypaster/models/Equipment.dart';
+import 'package:text_copypaster/models/service.dart';
 import 'package:text_copypaster/themes/colors.dart';
+import 'package:text_copypaster/widgets/modals/equipmentsRegister/editEquipment.dart';
+import 'package:text_copypaster/widgets/modals/serviceRegister/editService.dart';
+import 'package:text_copypaster/widgets/modals/serviceRegister/newService.dart';
+import 'package:text_copypaster/widgets/serviceCard.dart';
 
-class ServiceRegisterModal extends StatelessWidget {
+class ServiceRegisterModal extends StatefulWidget {
   final Equipment equipment;
+  final void Function() onDeleteEquipment;
 
-  const ServiceRegisterModal({Key? key, required this.equipment})
+  const ServiceRegisterModal(
+      {Key? key, required this.equipment, required this.onDeleteEquipment})
       : super(key: key);
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _ServiceRegisterModalState createState() => _ServiceRegisterModalState();
+}
+
+class _ServiceRegisterModalState extends State<ServiceRegisterModal> {
+  List<Service> services = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadServices();
+  }
+
+  Future<void> _loadServices() async {
+    List<Service> loadedServices = await DatabaseHelper()
+        .getServicesByEquipmentId(widget.equipment.id as int);
+    setState(() {
+      services = loadedServices;
+    });
+  }
+
+  void _showEditEquipmentModal() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return EditEquipment(
+          onEditEquipment: widget.onDeleteEquipment,
+          equipment: widget.equipment,
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +106,7 @@ class ServiceRegisterModal extends StatelessWidget {
                   width: 540,
                   child: SingleChildScrollView(
                     child: Text(
-                      equipment.name,
+                      widget.equipment.name,
                       style: GoogleFonts.poppins(
                         fontSize: 24,
                         fontWeight: FontWeight.w500,
@@ -95,15 +137,63 @@ class ServiceRegisterModal extends StatelessWidget {
                             title: Text("Excluir equipamento"),
                           ),
                         ),
+                        const PopupMenuItem(
+                            value: "Novo",
+                            child: ListTile(
+                              leading: Icon(Icons.add),
+                              title: Text("Novo serviço"),
+                            ))
                       ];
                     },
-                    onSelected: (String value) {
+                    onSelected: (String value) async {
                       switch (value) {
                         case "Novo":
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return NewServiceModal(
+                                id: widget.equipment.id as int,
+                                onServiceAdded: () {
+                                  _loadServices();
+                                },
+                              );
+                            },
+                          );
                           break;
                         case "Editar":
+                          _showEditEquipmentModal();
                           break;
                         case "Excluir":
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text("Confirmar exclusão"),
+                                content: const Text(
+                                    "Tem certeza que deseja excluir este equipamento?"),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context)
+                                          .pop(); // Fechar o diálogo
+                                    },
+                                    child: const Text("Cancelar"),
+                                  ),
+                                  TextButton(
+                                    onPressed: () async {
+                                      await DatabaseHelper()
+                                          .deleteEquipmentByid(
+                                              widget.equipment.id as int);
+                                      widget.onDeleteEquipment();
+                                      Navigator.of(context).pop();
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text("Confirmar"),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
                           break;
                       }
                     },
@@ -111,6 +201,20 @@ class ServiceRegisterModal extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+            SizedBox(
+              height: 570,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Column(
+                  children: services.map((service) {
+                    return ServiceCard(
+                      onRemove: _loadServices,
+                      service: service,
+                    );
+                  }).toList(),
+                ),
+              ),
             ),
           ],
         ),

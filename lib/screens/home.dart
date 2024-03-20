@@ -4,7 +4,7 @@ import 'package:text_copypaster/models/Equipment.dart';
 import 'package:text_copypaster/themes/colors.dart';
 import 'package:text_copypaster/widgets/cardsListing.dart';
 import 'package:text_copypaster/widgets/headerForm.dart';
-import 'package:text_copypaster/widgets/modals/equipmentsRegisterModal.dart';
+import 'package:text_copypaster/widgets/modals/equipmentsRegister/equipmentsRegisterModal.dart';
 
 class Home extends StatefulWidget {
   final VoidCallback toggleTheme;
@@ -32,6 +32,24 @@ class _HomeState extends State<Home> {
     });
   }
 
+  Future<void> _searchEquipments(String query) async {
+    if (!query.isEmpty) {
+      List<Equipment> updatedEquipments =
+          await DatabaseHelper().getEquipmentsByName(query);
+
+      setState(() {
+        equipments = updatedEquipments;
+      });
+    } else {
+      List<Equipment> updatedEquipments =
+          await DatabaseHelper().getAllEquipments();
+
+      setState(() {
+        equipments = updatedEquipments;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -54,6 +72,45 @@ class _HomeState extends State<Home> {
                 color: AppColors.terciaryColor(context),
               ),
               child: IconButton(
+                  icon: const Icon(Icons.arrow_downward),
+                  onPressed: () async {
+                    try {
+                      DatabaseHelper db = DatabaseHelper();
+                      await db.importDatabase();
+                      _reloadEquipments();
+                    } catch (e) {
+                      print('Erro ao importar banco de dados: $e');
+                    }
+                  }),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(right: 32.0),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: AppColors.terciaryColor(context),
+              ),
+              child: IconButton(
+                  icon: const Icon(Icons.arrow_upward),
+                  onPressed: () async {
+                    try {
+                      DatabaseHelper db = DatabaseHelper();
+                      await db.exportDatabase();
+                    } catch (e) {
+                      print('Erro ao importar banco de dados: $e');
+                    }
+                  }),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(right: 32.0),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: AppColors.terciaryColor(context),
+              ),
+              child: IconButton(
                 icon: const Icon(Icons.brightness_6),
                 onPressed: widget.toggleTheme,
               ),
@@ -64,42 +121,47 @@ class _HomeState extends State<Home> {
       body: Container(
         padding: const EdgeInsets.fromLTRB(100, 0, 100, 0),
         color: AppColors.secundaryColor(context),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: ListView(
           children: [
             const SizedBox(height: 20),
-            const Text(
+            Text(
               'Meus equipamentos',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
-            HeaderForm(onPressed: () {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return Dialog(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20.0),
-                    ),
-                    elevation: 0.0,
-                    backgroundColor: Colors.transparent,
-                    child: EquipmentsRegisterModal(
-                      onEquipmentAdded: () {
-                        _reloadEquipments();
-                      },
-                    ),
+            HeaderForm(
+                onTextChanged: _searchEquipments,
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return Dialog(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20.0),
+                        ),
+                        elevation: 0.0,
+                        backgroundColor: Colors.transparent,
+                        child: EquipmentsRegisterModal(
+                          onEquipmentAdded: () {
+                            _reloadEquipments();
+                          },
+                        ),
+                      );
+                    },
                   );
-                },
-              );
-            }),
+                }),
+            SizedBox(height: 20),
             Container(
               height: MediaQuery.of(context).size.height * 0.70,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: AppColors.inputBorder()),
               ),
-              child: CardsContainer(equipments: equipments),
+              child: CardsContainer(
+                equipments: equipments,
+                onDeleteEquipment: _reloadEquipments,
+              ),
             ),
           ],
         ),

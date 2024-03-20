@@ -4,15 +4,17 @@ import 'package:text_copypaster/widgets/modals/serviceRegister/serviceRegisterMo
 
 class CustomCard extends StatelessWidget {
   final Equipment equipment;
+  final void Function() onDeleteEquipment;
 
-  const CustomCard({Key? key, required this.equipment}) : super(key: key);
+  const CustomCard(
+      {Key? key, required this.equipment, required this.onDeleteEquipment})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        _showServiceRegisterModal(
-            context); // Chama a função para exibir o modal
+        _showServiceRegisterModal(context);
       },
       child: Container(
         padding: const EdgeInsets.all(8),
@@ -41,7 +43,8 @@ class CustomCard extends StatelessWidget {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return ServiceRegisterModal(equipment: equipment);
+        return ServiceRegisterModal(
+            equipment: equipment, onDeleteEquipment: onDeleteEquipment);
       },
     );
   }

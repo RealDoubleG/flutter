@@ -4,13 +4,14 @@ import 'package:text_copypaster/widgets/customCard.dart';
 
 class CardsContainer extends StatelessWidget {
   final List<Equipment> equipments;
+  final void Function() onDeleteEquipment;
 
-  const CardsContainer({Key? key, required this.equipments}) : super(key: key);
+  const CardsContainer(
+      {Key? key, required this.equipments, required this.onDeleteEquipment})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    print('Equipments received: $equipments');
-
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: Container(
@@ -23,6 +24,7 @@ class CardsContainer extends StatelessWidget {
           children: equipments
               .map((equipment) => CustomCard(
                     equipment: equipment,
+                    onDeleteEquipment: onDeleteEquipment,
                   ))
               .toList(),
         ),
